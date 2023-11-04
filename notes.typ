@@ -1,4 +1,4 @@
-= Lecture 1
+= Introduction
 == Background and Motivation
 - Parallel computing is a part of HPC.
     - HPC also includes everything else that makes the computation fast.
@@ -30,6 +30,8 @@
     - Exponential
     - Factorial
 - Log factor are often ignored.
+
+#pagebreak()
 
 == Model
 - RAM model: _#text(blue)[random access machine]_
@@ -84,6 +86,7 @@ Power of model: expresses the set of all problems that can be solved within a ce
     - Optimal: processor optimal AND $t(n) = cal(O)(log^k n)$
         - Processor optimal and polylog in time.
     - Efficient: Assume $T(n) = Omega(n)$ $w(n) = cal(O)(T(n) log^alpha n)$ AND polylog in time
+        - Optimal but polylog increase in work.
 - #text(blue)[_size_]: $"Size"(n)$ is the total number of operations it does.
 - #text(blue)[_efficiency_]: $eta(n)$ speedup per processor
     - $eta(n) = T(n) / w(n) = "Speedup"(n) / p(n)$
@@ -107,4 +110,34 @@ Power of model: expresses the set of all problems that can be solved within a ce
   $"Speedup"(p) = Omega(p)$
   - Very obvious again...
 
-
+== Algorithms
+- sum
+- logical or
+- Maximum
+    - $n^2$ processors all compare all elements and set is_max array to false if element isn't
+      maximum.
+    - Only processor with element being max write it to the returning memory address.
+- Maximum$n^2$
+    - $cal(O)(log log n)$
+    - $n$ processor on $n$ elements.
+    - Is efficient
+    - Make elements into a square, find maximum on each row recursively.
+    - Find maximum of maximum of the rows using maximum.
+    - $cal(O)(log log n)$ levels of recursion, each level takes $cal(O)(1)$ times
+- Element Uniqueness
+    - Have an array size of MAX_INT.
+    - Write processor ID to the array with the element.
+    - Check if processor ID is indeed there, if not there's another element there.
+- Replication
+    - $O(log n)$
+- Replication optimal
+    - $p = n / log(n)$ and copy at the end.
+- Broadcast
+    - Just replicate
+- Simulate PRIORITY with COMMON $n^2$
+    - Minimum version of Maximum
+- Simulate PRIORITY with EREW
+    - All processor wants to write
+    - Sort array A of tuples (address, processorID) using Cole's Merge Sort.
+    - For each processor k, if $A[k]."address" != A[k-1]."address"$ then $A[k]."processorID"$ is the
+      smallest ID that wants to write to that address.
