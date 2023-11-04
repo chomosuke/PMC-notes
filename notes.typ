@@ -66,7 +66,7 @@ Power of model: expresses the set of all problems that can be solved within a ce
 - COMMON, ARBITRARY, PRIORITY and COMBINING are in increasing order of power.
 - Any CRCW PRIORITY PRAM can be simulated by a EREW PRAM with a complexity increase of $cal(O)(log
   p)$
-\
+#v(10pt)
 - _#text(blue)[Parallel Computation Thesis]_: any thing can be solved with a Turing Machine with
   polynomially bounded space can be solved in polynomially bounded space with unlimited processors.
     - Unbounded _#text(blue)[word sizes]_ are not useful, so we limit word counts to $cal(O)(log p)$
@@ -90,8 +90,7 @@ Power of model: expresses the set of all problems that can be solved within a ce
 - #text(blue)[_size_]: $"Size"(n)$ is the total number of operations it does.
 - #text(blue)[_efficiency_]: $eta(n)$ speedup per processor
     - $eta(n) = T(n) / w(n) = "Speedup"(n) / p(n)$
-
-\
+#v(10pt)
 - You can decrease $p$ and increase $t$ by a factor of $O(p_1/p_2)$, $w(n)$ doesn't increase its
   complexity.
     - Can't do it the other way around.
@@ -141,3 +140,79 @@ Power of model: expresses the set of all problems that can be solved within a ce
     - Sort array A of tuples (address, processorID) using Cole's Merge Sort.
     - For each processor k, if $A[k]."address" != A[k-1]."address"$ then $A[k]."processorID"$ is the
       smallest ID that wants to write to that address.
+
+= Architecture
+- Fetch Decode Execute WriteBack
+#image("cpu-cycles.png", width: 60%)
+- Bus is a wire and everyone can see everything on that wire.
+#v(10pt)
+- Pipeline: let's do all of them at the same time for the next 4 instructions
+    - Need to predict the next 4 instructions sometimes.
+- Superpipeline: Do all of them for the next 8 (or more) instructions.
+- Superscalar: Multiple pipeline in parallel
+#v(10pt)
+- Word size: 64 bits, 32 bits etc, various aspects:
+    - Integer size
+    - Float size
+    - Instruction size
+    - Address resolution (mostly bytes)
+- Single instruction multiple data SIMD
+    - Make word size more complicated
+#v(10pt)
+- Coprocessor
+    - Used to means stuff directly connected to the CPU like a floating point processor.
+    - Now can means FPGA or GPU.
+#v(10pt)
+- Multicore processor are just single core duplicated but they all have one extra single shared
+  cache.
+#v(10pt)
+- Classification of parallel architectures
+    - SISD regular single core.
+    - SIMD regular modern single core.
+    - MIMD regular multicore.
+    - MISD doesn't exist.
+- SIMD vs MIMD
+    - Effectively SIMD vs non-SIMD
+    - Most processor have multicore and SIMD on each core.
+        - So a balance between the two.
+    - SIMD cores are larger so less of them fit on a die.
+    - SIMD is faster at vector operations.
+    - SIMD is not useful all the time so sometimes the SIMD part sit idle.
+    - SIMD is harder to program.
+#v(10pt)
+- Shared memory: All memory can be accessed by all processors.
+    - All memory access truly equal time: symmetric multi-processor.
+        - Only can have so many cores when the bus is only so fast.
+        - Making more buses doesn't help cause space also slows things down.
+        - Sometimes can be done with switching interconnect network.
+    - Some processor access some memory faster.
+        - More complex network.
+    - Distributed shared memory: each processor have its own memory but interconnect network exist
+      so you can read other people's memory.
+        - #text(blue)[_non-uniform memory access_] NUMA
+        - Static interconnect network: each node connect to some neighbors.
+            - #text(blue)[_degree_]: just like degree in graphs.
+            - #text(blue)[_diameter_]: just like in graphs.
+            - #text(blue)[_cost_] $= "degree" times "diameter"$
+- Distributed memory: Each processor have its own memory. Each process live on one processor.
+#v(10pt)
+- Blade contains Processor / Package / Socket which contains Core which contains ALU.
+#v(10pt)
+- Implicit vs explicit: explicit $->$ decision made by programmer
+    - Parallelism: Can I write a sequential algorithm.
+    - Decomposition: Can I pretend threads processes doesn't exist.
+    - Mapping: Can I pretend all cores are the same.
+    - Communication.
+#v(10pt)
+- Single Program Multiple Data: one exe
+- Multiple Program Multiple Data: multiple exe
+
+Other HPC considerations
+- Cache friendliness
+- Processor-specific code
+- Compiler optimization.
+    - Compiler from CPU maker are usually better.
+    - So Intel compiler is better than both clang and gcc.
+
+Memory interleaving
+- Memory module takes a while to recharge, so we interleave a page on different memory module.
