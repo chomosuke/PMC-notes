@@ -216,3 +216,29 @@ Other HPC considerations
 
 Memory interleaving
 - Memory module takes a while to recharge, so we interleave a page on different memory module.
+
+Automatic Vectorization
+- Sometimes compilers automatically insert SIMD instructions in place of loops.
+    - Depends on the availabilities of a lot of things, including the OS.
+- Manual SIMD: #image("manual-SIMD.png")
+- AVX have to be aligned: i.e. 256 bits SIMD have to be 256 bits aligned - address is multiple of
+  256 bits.
+
+Multithreading
+- Synchronization is more expensive if threads are on cores further away.
+    - It's expensive in general.
+#v(10pt)
+- Instruction reordering: thread continues with other instructions while it waits on earlier
+  instructions.
+- Speculative execution: don't wait on instructions, just go for it and if it fails then unroll.
+#v(10pt)
+- Some programming patterns are more friendly to NUMA.
+
+Message passing considerations
+- Multi processing have to pass messages around because processes don't share address space.
+- Hard to predict performance.
+
+Wants good communication patterns
+- For multithread multiprocess: #image("mtmp-comm.png", width: 60%)
+- For single thread multiprocess: #image("stmp-comm.png", width: 60%)
+
