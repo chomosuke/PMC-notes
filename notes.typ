@@ -1,3 +1,5 @@
+#set page(numbering: "1")
+
 = Introduction
 == Background and Motivation
 - Parallel computing is a part of HPC.
@@ -420,3 +422,5 @@ Memory
     - `partition`: `environment` (default), `nearest`, `blocked`, `interleaved`. How is the
       allocated memory partitioned over the allocator's storage resource.
 
+= Prefix Sum
+- Doesn't have to be sum, can also be any other associative operations (like prod, min, max).
