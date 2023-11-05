@@ -66,7 +66,7 @@ Power of model: expresses the set of all problems that can be solved within a ce
 - COMMON, ARBITRARY, PRIORITY and COMBINING are in increasing order of power.
 - Any CRCW PRIORITY PRAM can be simulated by a EREW PRAM with a complexity increase of $cal(O)(log
   p)$
-#v(10pt)
+#v(8pt)
 - _#text(blue)[Parallel Computation Thesis]_: any thing can be solved with a Turing Machine with
   polynomially bounded space can be solved in polynomially bounded space with unlimited processors.
     - Unbounded _#text(blue)[word sizes]_ are not useful, so we limit word counts to $cal(O)(log p)$
@@ -90,7 +90,7 @@ Power of model: expresses the set of all problems that can be solved within a ce
 - #text(blue)[_size_]: $"Size"(n)$ is the total number of operations it does.
 - #text(blue)[_efficiency_]: $eta(n)$ speedup per processor
     - $eta(n) = T(n) / w(n) = "Speedup"(n) / p(n)$
-#v(10pt)
+#v(8pt)
 - You can decrease $p$ and increase $t$ by a factor of $O(p_1/p_2)$, $w(n)$ doesn't increase its
   complexity.
     - Can't do it the other way around.
@@ -145,12 +145,12 @@ Power of model: expresses the set of all problems that can be solved within a ce
 - Fetch Decode Execute WriteBack
 #image("cpu-cycles.png", width: 60%)
 - Bus is a wire and everyone can see everything on that wire.
-#v(10pt)
+#v(8pt)
 - Pipeline: let's do all of them at the same time for the next 4 instructions
     - Need to predict the next 4 instructions sometimes.
 - Superpipeline: Do all of them for the next 8 (or more) instructions.
 - Superscalar: Multiple pipeline in parallel
-#v(10pt)
+#v(8pt)
 - Word size: 64 bits, 32 bits etc, various aspects:
     - Integer size
     - Float size
@@ -158,14 +158,14 @@ Power of model: expresses the set of all problems that can be solved within a ce
     - Address resolution (mostly bytes)
 - Single instruction multiple data SIMD
     - Make word size more complicated
-#v(10pt)
+#v(8pt)
 - Coprocessor
     - Used to means stuff directly connected to the CPU like a floating point processor.
     - Now can means FPGA or GPU.
-#v(10pt)
+#v(8pt)
 - Multicore processor are just single core duplicated but they all have one extra single shared
   cache.
-#v(10pt)
+#v(8pt)
 - Classification of parallel architectures
     - SISD regular single core.
     - SIMD regular modern single core.
@@ -179,7 +179,7 @@ Power of model: expresses the set of all problems that can be solved within a ce
     - SIMD is faster at vector operations.
     - SIMD is not useful all the time so sometimes the SIMD part sit idle.
     - SIMD is harder to program.
-#v(10pt)
+#v(8pt)
 - Shared memory: All memory can be accessed by all processors.
     - All memory access truly equal time: symmetric multi-processor.
         - Only can have so many cores when the bus is only so fast.
@@ -195,15 +195,15 @@ Power of model: expresses the set of all problems that can be solved within a ce
             - #text(blue)[_diameter_]: just like in graphs.
             - #text(blue)[_cost_] $= "degree" times "diameter"$
 - Distributed memory: Each processor have its own memory. Each process live on one processor.
-#v(10pt)
+#v(8pt)
 - Blade contains Processor / Package / Socket which contains Core which contains ALU.
-#v(10pt)
+#v(8pt)
 - Implicit vs explicit: explicit $->$ decision made by programmer
     - Parallelism: Can I write a sequential algorithm.
     - Decomposition: Can I pretend threads processes doesn't exist.
     - Mapping: Can I pretend all cores are the same.
     - Communication.
-#v(10pt)
+#v(8pt)
 - Single Program Multiple Data: one exe
 - Multiple Program Multiple Data: multiple exe
 
@@ -227,11 +227,11 @@ Automatic Vectorization
 Multithreading
 - Synchronization is more expensive if threads are on cores further away.
     - It's expensive in general.
-#v(10pt)
+#v(8pt)
 - Instruction reordering: thread continues with other instructions while it waits on earlier
   instructions.
 - Speculative execution: don't wait on instructions, just go for it and if it fails then unroll.
-#v(10pt)
+#v(8pt)
 - Some programming patterns are more friendly to NUMA.
 
 Message passing considerations
@@ -241,4 +241,97 @@ Message passing considerations
 Wants good communication patterns
 - For multithread multiprocess: #image("mtmp-comm.png", width: 60%)
 - For single thread multiprocess: #image("stmp-comm.png", width: 60%)
+
+= OpenMP
+- Abstracts single process, multithreaded program execution on a single machine.
+- Abstracts: Multi-socket, multi-core, threads, thread synchronization, memory hierarchy, SIMD,
+  NUMA.
+- Everything OMP does are hints.
+#v(8pt)
+- #text(blue)[_internal control variable_]: ICV: OMP_NUM_THREADS, OMP_THREAD_LIMIT, OMP_PLACES,
+  OMP_MAX_ACTIVE_LEVELS.
+- Can also be set with functions in `#include "omp.h"`
+
+Execution Model
+- There's an implicit parallel region on the outside.
+- There's by default an implicit barrier at the end of each parallel region.
+    - `no-wait` removes the implicit barrier
+- If a parallel region is encountered, then the threads split and a new team is created.
+- A lot of parallel region nested can create a lot of thread very quickly.
+    - Can limit nesting by `OMP_MAX_ACTIVE_LEVELS`.
+
+Memories: global, stack, heap
+- Threads have their own stack but share global and heap.
+
+== Directives
+- The `#pragma omp` thingy.
+- Allows specifying parallelism and still allow the base language to be the same.
+    - Theoretically, simply remove the directives and program will just run like a sequential
+      program.
+- Syntax: ```
+#pragma omp <directive name> [[,]<clause> [[,]<clause> [...]]]
+<statement / block>
+```
+- Multiple directives can be applied to one following block
+- Some directives are #text(blue)[_stand alone_], they don't have structured block following them.
+
+Synchronization
+- #text(blue)[_thread team_] is a group of threads.
+- `barrier` will block threads in a team that reach it early.
+- `flush` will enforce consistency between different thread's view of memory.
+- `critical` ensures a critical region where only one thread can be in it at a time.
+- `atomic` is faster than critical but only for simple operations.
+#v(8pt)
+- `simd` make use of SIMD instructions.
+- #text(blue)[_places_]: specify how processing units on the architecture are partitioned.
+#v(8pt)
+- Thread encounters a parallel directive -> split itself into the number of threads.
+- `#pragma omp parallel`
+    - create some number of threads and do its thing.
+    - clauses:
+        - `num_threads(int)` overrides ICV, limited by OMP_THREAD_LIMIT
+        - `private(list of variables)` each thread will have own memory allocated to private
+          variable.
+        - `shared(list of variables)` all thread share the same variables, same piece of memory.
+- `#pragma omp for`
+    - clauses:
+        - `schedule([modifier[, modifier]:]kind[, chunk_size])`
+            - kind:
+                - `static`: divided into chunk_size (default $"iterations" / "num threads"$) and
+                  distributed round-robin over the threads.
+                - `dynamic`: chunks of chunk_size (default 1) distributed to threads as they
+                  complete them.
+                - `guided`: like `dynamic` but varying `chunk_size`, large chunks at the start and
+                  small chunks at the end.
+                - `auto`: default.
+                - `runtime`: determined by `sched-var` ICV.
+            - modifier:
+                - `monotonic`: chunks are given in increasing logical iteration
+                - `nonmonotonic`: default, allows #text(blue)[_work stealing_]: I finished early, I
+                  will now take your work.
+                - `simd`: try to make the loop into SIMD constructs.
+        - `collapse(n)`: n nested loops are combined into one large logical loop.
+        - `ordered[(n)]`: There are operations in the loop that must be executed in their logical
+          order.
+        - `reduction([reduction-modifier, ] reduction-modifier:list)`: a list of variable that will
+          be used in a reduction operation.
+- `#pragma omp loop`
+    - Work for any loop, not just for.
+    - Main diff to for is `bind`
+- `#pragma omp sections`
+    - Have `#pragma omp section` inside.
+    - Each `#pragma omp section` gets executed by one thread.
+    - clauses:
+        - `private(list of variables)`: each thread will have its own version of the variable.
+        - `firstprivate(list of variables)`: same as private but memory is initialized to the
+          global version.
+        - `lastprivate(list of variables)`: copy the private variables to the global version for the
+          "lexically last" private variables.
+- `#pragma omp single`
+    - Only do it in a single thread in the team, used inside `#pragma omp parallel`
+        - `private(list of variables)`: each thread will have its own version of the variable.
+        - `firstprivate(list of variables)`: same as private but memory is initialized to the
+          global version.
+- `#pragma omp workshare`
+    - Here's a bunch of independent statements / blocks, figure out how to parallelize it.
 
