@@ -292,7 +292,12 @@ Synchronization
         - `num_threads(int)` overrides ICV, limited by OMP_THREAD_LIMIT
         - `private(list of variables)` each thread will have own memory allocated to private
           variable.
+            - Default for variables on stack.
         - `shared(list of variables)` all thread share the same variables, same piece of memory.
+            - OpenMP will add locks.
+        - `threadprivate(list of variables)` variable stay with the thread if all threadprivate
+          directives are identical.
+    - Can combine with `for`, `loop`, `sections` and `workshare`.
 - `#pragma omp for`
     - clauses:
         - `schedule([modifier[, modifier]:]kind[, chunk_size])`
@@ -315,6 +320,11 @@ Synchronization
           order.
         - `reduction([reduction-modifier, ] reduction-modifier:list)`: a list of variable that will
           be used in a reduction operation.
+            - Allowed operations: +, -, \*, &, ^, &&, ||, max, min
+            - Example: `#pragma omp parallel for reduction(+:x)`, `x` is the result, `+` is the
+              operation.
+                - `x` starts as a private variable initialized to the identity value.
+                - global `x` will be assigned to the sum of all `x`s at the end.
 - `#pragma omp loop`
     - Work for any loop, not just for.
     - Main diff to for is `bind`
@@ -334,4 +344,79 @@ Synchronization
           global version.
 - `#pragma omp workshare`
     - Here's a bunch of independent statements / blocks, figure out how to parallelize it.
+- `#pragma omp atomic`
+    - critical for read, write, update (`x += 1`), compare (`if (expr < x) x = expr;`).
+- `#pragma omp critical [(name) [[,] hint(hint-expression)]]`
+    - clauses:
+        - `(name)`: two critical region with the same name can't happen at the same time.
+            - All no name critical region are treated as having the same name.
+        - `hint(hint-expression)`:
+            - `omp_sync_hint_uncontended`
+            - `omp_sync_hint_contended`
+            - `omp_sync_hint_speculative`: try to speculate.
+            - `omp_sync_hint_nonspeculative`: don't try to speculate.
+- `#pragma omp ordered`
+    - Inside loops so that they're executed in their logical order.
+- `#pragma omp barrier`
+    - Explicit barrier.
+- `#pragma omp flush`
+    - Sync cache.
+    - Be aware of code reordering.
+- `#pragma omp task`
+    - The #text(blue)[_Task Model_]: specify work without allocating work to threads.
+    - Task is a unit of work.
+    - Task have dependencies such as completion of other tasks.
+    - Task may generate other tasks.
+    - Uses many same clauses such as `private`, `shared` and `firstprivate`.
+    - Task can have data affinity.
+    - clauses:
+        - `depend([depend-modifier,] dependence-type:locator-list)`.
+        - `priority(int)`: hint of order of execution.
+        - `affinity([aff-modifier :] locator-list)`
+- `#pragma omp taskloop`
+    - clauses:
+        - `num_tasks([strict:]num-tasks)`: specify the number of tasks that will be generated.
+        - `grainsize([strict:]grainsize)`: how many iteration per task.
+- `#pragma omp taskwait`
+    - Wait for all current child tasks to finish
+\
+Places
+- OMP_PLACES: list of power units by their identifiers
+    - `{0,1,2,3},{4,5,6,7}`: specify two places each with 4 processing units.
+        - use `hwloc-ls` to find processing unit number.
+    - `threads(8)`: 8 places on 8 hardware threads
+    - `cores(4)`: 4 places on 4 cores.
+    - `ll_caches(2)`: 2 places on 2 set of cores where all the cores in a set shares their last
+      level cache.
+    - `numa_domains(2)`: 2 places on 2 set of cores whose closes memory is the same or similar
+      distance.
+    - `sockets(2)`: 2 places on two sockets
+    - OMP_PLACES partition power units into places. Which can then be referred to by
+      `proc_bind(type)` clause in `parallel` directives.
+- `proc_bind(type)`: overrides OMP_PROC_BIND, only in `parallel` directives.
+    - `primary`: All threads created in the team are in the same place.
+    - `close`: Threads are allocated to places in a round-robin fashion - first thread in place i,
+      second thread in place i + 1, third thread in place i + 2
+    - `spread`: Place thread in a way so that the distance between the power unit ID are as far as
+      possible.
+
+Memory
+- Sending memory to other numa domains cost cache as well because the send operation needs to be
+  done by a CPU which means cache.
+- OpenMP memory classification:
+    - `omp_default_mem_space`: DRAM
+    - `omp_large_cap_mem_space`: SSD
+    - `omp_const_mem_space`: optimized for read only
+    - `omp_high_bw_mem_space`: high bandwidth
+    - `omp_low_lat_mem_space`: low latency.
+- Memory allocator have traits:
+    - `sync_hint`: expected concurrency - `contended` (default), `uncontended`, `serialized`,
+      `private`
+    - `alignment`: default byte.
+    - `access`: which thread can access the memory, `all` (default), `cgroup`, `pteam`, `thread`
+    - `pool_size`: total amount of memory the allocator can allocate.
+    - `fallback`: on error return null or exit, default is first try standard allocator and return
+      null if fail.
+    - `partition`: `environment` (default), `nearest`, `blocked`, `interleaved`. How is the
+      allocated memory partitioned over the allocator's storage resource.
 
