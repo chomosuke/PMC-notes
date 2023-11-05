@@ -339,6 +339,7 @@ Synchronization
           global version.
         - `lastprivate(list of variables)`: copy the private variables to the global version for the
           "lexically last" private variables.
+            - A variable can be firstprivate and lastprivate at the same time.
 - `#pragma omp single`
     - Only do it in a single thread in the team, used inside `#pragma omp parallel`
         - `private(list of variables)`: each thread will have its own version of the variable.
@@ -424,3 +425,28 @@ Memory
 
 = Prefix Sum
 - Doesn't have to be sum, can also be any other associative operations (like prod, min, max).
+- The only way to reduce depth is to increase size (hopefully only slightly).
+== Upper/Lower parallel prefix algorithm
+- Divide array into two parts and compute their prefix sum.
+- Add the sum of the first part to the second part.
+- $Theta(log n)$ time complexity
+- $Theta(n log n)$ work
+- $Theta(n log n)$ size
+- Half of the processors are idle all time except first iteration. (can probably be easily fixed)
+
+== Odd/Even parallel prefix algorithm
+- Divide array into odd and even indices parts.
+- Add odd indices to even indices.
+- Compute prefix of even part recursively.
+    - Now the even part contains the correct prefix.
+- Compute the odd part in one parallel step.
+- Same complexity as Upper/Lower, but 2 times slower.
+
+== Ladner and Fischer's parallel prefix algorithm.
+- Optimal possible time.
+- Split array into two parts and use odd even for the first part, upper lower for the second part.
+    - Odd even for the first part is beneficial because the last element is available one step
+      earlier.
+
+== Pointer jumping
+- All processor replace next with next next, so you start going in $2^n$ steps for each iteration.
