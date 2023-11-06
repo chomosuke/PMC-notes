@@ -535,3 +535,52 @@ them with bitonic sort.
     - We can more better utilize processor if there are less than $n$ processor by using
       #text(blue)[_cyclic-striped partitioning_]. #image("cyclic-stripe-partitioning.png", width:
       40%)
+
+= MPI
+- Pass messages between processes. #image("mpi-model.png", width: 75%)
+- Provide consistent interface to have portable code on different architectures.
+- Can be sync or async
+    - sync: returns after message being read by receiver process.
+    - async: returns asap and have some other thread or the kernel do the sending.
+- MPI is a language.
+
+== Communicator
+- Communicators: a set of processes.
+    - `MPI_COMM_WORLD`: all processes.
+- Rank: 0 based index of your processes given a communicator.
+- Size: size of the communicator.
+
+== Functions
+- `int MPI_Init(int *argc, char ***argv)`: first MPI call, initialize the MPI execution environment,
+  takes away the MPI arguments by modifying `argc` and `argv`.
+
+- `int MPI_Finalize()`: last MPI call.
+
+- `int MPI_Send(void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)`
+
+- `int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm,
+  MPI_Status *status)`
+    - For send and receive to succeed, rank must be valid, communicator must be same, tags must be
+      same (or say idk what tag), message datatype must be compatible.
+
+- `int MPI_Bcast(void *buf, int count, MPI_Datatype, int root, MPI_Comm comm)`
+
+- `int MPI_Scatter(void *buf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)`
+    - One node send different data to other nodes.
+
+- `int MPI_Gather(void *buf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)`
+    - Opposite of scatter.
+
+- `int MPI_Allgather(void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)`
+
+- `int MPI_Alltoall(void * sendbuf, int sendcount, MPI_Datatype sendtype, void * recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm )`
+
+- `int MPI_Alltoallv(void * sendbuf, int * sendcounts, int * sdispls, MPI_Datatype sendtype, void * recvbuf, int * recvcounts, int * rdispls, MPI_Datatype recvtype, MPI_Comm comm)`
+
+- `int MPI_Reduce(void * sendbuf, void * recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm)`
+    - `MPI_Op` can be: `MPI_MAX`, `MPI_MIN`, `MPI_SUM`, `MPI_PROD`, `MPI_LAND`, `MPI_BAND`,
+      `MPI_LOR`, `MPI_BOR`, `MPI_LXOR`, `MPI_BXOR`.
+
+- `int MPI_Barrier(MPI_Comm comm)`
+    - Mostly used to share OS resource are not controlled by MPI.
+
