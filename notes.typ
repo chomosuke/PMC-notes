@@ -510,3 +510,28 @@ Memory
 You can use bitonic sort to do bitonic merge sort, by keep constructing bitonic lists and merging
 them with bitonic sort.
 
+= Matrix Multiplication
+- Matrix multiplication doesn't have dependencies between them, so easy to parallelize with less
+  than $n^2$ processors.
+- Pretty trivial to parallelize in ideal conditions, so we will focus on practical side of matrix
+  multiplication.
+- For huge matrices, we can divide them into smaller one, multiply the smaller ones, and then sum
+  the smaller ones. #image("divide-matrix.png", width: 60%)
+- You can divide the matrices into 4 parts recursively, until the matrix is small enough to fit into
+  the cache.
+
+= Gaussian elimination
+- Common for matrix to be sparse, aka mostly zero.
+- Gaussian elimination is for dense matrix.
+- Solving system of linear equation by getting rid of variables one by one by rewriting them in
+  terms of other variables. #image("gaussian-elimination.png", width: 50%)
+- If a coefficient of a variables is close to zero, then we run into numerical problems.
+    - We can swap this row with the rows below to fix this. This is called #text(blue)[_partial
+      pivoting_]
+        - Partial because the columns aren't being swapped.
+        - Can be done in $cal(O)(log_2 n)$
+        - We will ignore partial pivoting to simplify our problem. (make it more theoretical)
+- The eliminate step can be parallelized. Resulting in time complexity of $cal(O)(n^2)$ with $p = n$
+    - We can more better utilize processor if there are less than $n$ processor by using
+      #text(blue)[_cyclic-striped partitioning_]. #image("cyclic-stripe-partitioning.png", width:
+      40%)
