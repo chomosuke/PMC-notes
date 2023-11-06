@@ -450,3 +450,63 @@ Memory
 
 == Pointer jumping
 - All processor replace next with next next, so you start going in $2^n$ steps for each iteration.
+
+= Sorting
+- Merge sort parallelized is $O(n)$ because last merge is sequential.
+- Quick sort parallelized is $O(n)$ because the first split is sequential.
+
+== Parallel merge
+- $cal(O)(n/p + log p)$ or $cal(O)(log n)$ where $p = n$
+- Two sorted list, assume all value are below $n$ where $n$ is the length of the resulting array.
+- Count unique value for both of them.
+- Write the sum of count for both array to result array with index $X$.
+- Now the count is sorted.
+- Compact the result array.
+- Use prefix sum to space the resulting array evenly so that there are $"count" - 1$ null element
+  after even element.
+- Use distribution to fill out the rest of the array.
+
+=== Compaction
+- Move all non null element to the first part of the array.
+- Use prefix sum to count the index of each empty element.
+- Move each non empty element to its index.
+
+=== Unique Counts
+- Sorted array to (value, count) element.
+- Find all places where the adjacent values are different.
+- Use prefix sum to find their index.
+- Reverse engineer their count with old indices.
+
+=== Distribution
+- Array with some null value, fill with the closest non null value to the left.
+- Best complexity is achieved with simple broadcast.
++ Use prefix sum and unique count to figure out how many empty element are after each non empty one.
++ Do sequential distribute with each processor.
++ For the processors where their first element is null:
+    + Still need to fill
+    + Use info obtained previously at the very first step to calculate how long does this null
+      sequence last.
+    + All processor involved in the null sequence, broadcast!
+
+== Rank sort
+- Count the number of element smaller and number of element bigger, and just write this element to
+  the array.
+- Use $n^2$ processors. Can count the index in $cal(O)(log n)$ time.
+- With a combine PRAM, it can be done in $cal(O)(1)$ time.
+
+=== Rank Merge
+- Much simpler than Parallel merge, just use binary search to find the ranks.
+
+== Bitonic MergeSort
+- Bitonic is a sequence is two monotonic sequences but one up and one down.
+- You can find the pivot and turn this into a regular merge.
+- Alternatively:
+    - compare and maybe swap each two pair of element in two part of the array (none of them
+      reversed.)
+    - You end up getting two bitonic array.
+    - Keep doing this and you sort it.
+    - Same time complexity.
+
+You can use bitonic sort to do bitonic merge sort, by keep constructing bitonic lists and merging
+them with bitonic sort.
+
