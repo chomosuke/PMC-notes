@@ -684,3 +684,13 @@ them with bitonic sort.
     - Vendor-lock to Nvidia.
     - Hard to debug, don't have printf in early versions.
 
+= CUDA optimization
+- You want threads with similar index to be doing the same thing cause then the whole block isn't
+  wait for a small portion of block to do something.
+- You want to make sure you're not reading from the same memory bank by reading from a continues
+  block of memory, hence using different memory bank due to memory striped layout
+- You don't want idle threads, you can do this by reducing the number of threads and increasing the
+  load on each threads.
+- You can try unrolling the loops.
+- If the number of threads are less than wrap size, then you can remove `__syncthreads`
+- Use Brent's theorem to do some sequential work first and then parallelize.
