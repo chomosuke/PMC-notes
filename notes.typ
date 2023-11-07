@@ -584,3 +584,71 @@ them with bitonic sort.
 - `int MPI_Barrier(MPI_Comm comm)`
     - Mostly used to share OS resource are not controlled by MPI.
 
+- `MPI_Ssend`: sync
+    - `MPI_Send` can be sync or async
+    - Sync send can deadlock if the receiver is waiting for a message with a different tag.
+
+- `MPI_Bsend`: Async
+    - Many other type of `MPI_Send`
+    - Async send can be out of order.
+    - Can check status to check tag.
+
+- `MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)`
+
+- `int MPI_Cart_create(MPI_Comm comm_old, int ndims, int *dims, int *periods, int reorder, MPI_Comm *comm_cart)`
+    - Create cartesian topology
+
+- `int MPI_Dims_create(int nnodes, int ndims, int *dims)`
+    - Will fill in the zeros in `dims`, will try to make dimensions as close to each other as
+      possible.
+
+- `int MPI_Cart_rank(MPI_Comm comm, int *coords, int *rank)`
+    - Map coordinates to rank.
+
+- `int MPI_Cart_coords(MPI_Comm comm, int rank,, int maxdims, int *coords)`
+    - Map rank to coordinates.
+
+- `int MPI_Cart_shift(MPI_Comm comm, int direction, int disp, int *rank_source, int *rank_dest)`
+    - Source is who will send to me
+    - Dest is who will I send to
+
+- `int MPI_Sendrecv_replace(void *buf, int count, MPI_Datatype datatype, int dest, int sendtag, int source, int recvtag, MPI_Comm comm, MPI_Status *status)`
+    - Take the result of my source and replace my data which will be send to my dest.
+    - Can use with `MPI_Cart_shift` but not necessary.
+
+- `MPI_PROC_NULL`: send or receive from and to `MPI_PROC_NULL` does nothing so we don't have to move
+  forward.
+
+== Multithreading
+- 4 levels options of support:
+    - 0, `MPI_THREAD_SINGLE`: only one thread will execute.
+    - 1, `MPI_THREAD_FUNNELED`: only one thread will make MPI calls.
+    - 2, `MPI_THREAD_SERIALIZED`: calls well never be concurrent.
+    - 3, `MPI_THREAD_MULTIPLE`: No restrictions.
+- Call `MPI_Init_thread(int *argc, char ***argv, int required, int *provided)` instead of `MPI_Init`
+  to declare you need multithreading.
+
+== Topologies
+- Examples: ring.
+- MPI have function that allows you to refer to "node below me" which will calculate the rank for
+  you.
+- Cylinder: #image("cylinder.png", width: 50%)
+- Cartesian: a grid that might or might not be cyclic with each dimensions.
+- Graph topologies: explicitly list neighbours of each node
+
+== Derived Types
+- Can define new MPI_Datatype.
+- Can be used in place of any MPI_Datatype can.
+- Types are defined with other list of types and displacements (in bytes).
+- `int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype *newtype)`: just an array
+  of the same type.
+- Vector Datatype: #image("mpi-vector-datatype.png", width: 60%)
+    - Good for sub blocks of a matrix.
+    - `int MPI_Type_vector(int count, int blocklength, int stride, MPI_Datatype oldtype, MPI_Datatype *newtype)`
+- `int MPI_Type_create_struct(int count, const int array_of_blocklengths[], const MPI_Aint array_of_displacements[], const MPI_Datatype array_of_types[], MPI_Datatype *newtype)`
+    - Can represent any struct.
+- After create datatype, must call `int MPI_Type_commit(MPI_Datatype *datatype)`
+    - Can use uncommited datatype to build other data type.
+- `int MPI_Type_free(MPI_Datatype *datatype)`
+    - Free a committed type's memory.
+- Count $times$ Fundamental datatype count must match for send and receive.
