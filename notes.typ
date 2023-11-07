@@ -652,3 +652,35 @@ them with bitonic sort.
 - `int MPI_Type_free(MPI_Datatype *datatype)`
     - Free a committed type's memory.
 - Count $times$ Fundamental datatype count must match for send and receive.
+
+= GPU
+- GPGPU: General purpose GPU
+- Many CUDA core / Streaming processor make up of Streaming multiprocessor.
+- GPU have:
+    - Threads: smallest execution entity, each have their own id.
+    - Block / warp made up of threads that execute in a single multiprocessor in sync. Every thread
+      runs the same line of code at the same time.
+        - Blocks are SIMD.
+    - Grid: a bunch of blocks that execute a kernel function (kinda like a regular function).
+        - Blocks are running the same code but not in lock step.
+        - Blocks are independent to each other, can go in any order.
+- GPU have memory that's high throughput.
+    - Global memory: main memory ~100ms
+        - IO for grid
+    - Shared memory ~128kB: shared memory ~5ns about the speed of L1 cache.
+        - per block
+        - Can use for collaboration within a block.
+    - Register and local memory: fastest, around 10x faster than shared memory, not as fast as
+      registers on CPU.
+        - Per thread
+        - Store stack vars.
+- Compared with CPU
+    - CPU wants to run one thread very fast: Sophisticated control, powerful ALU, Large cache.
+    - GPU wants high throughput: simple control, small caches, many efficient ALU.
+- CUDA: Compute Unified Device Architecture.
+    - Extends C/C++, can run on both GPU and CPU.
+    - Abstract from the hardware, same code run on many GPU.
+    - Auto thread management.
+    - Vendor-lock to Nvidia.
+    - Hard to debug, don't have printf in early versions.
+
