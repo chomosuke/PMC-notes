@@ -694,3 +694,49 @@ them with bitonic sort.
 - You can try unrolling the loops.
 - If the number of threads are less than wrap size, then you can remove `__syncthreads`
 - Use Brent's theorem to do some sequential work first and then parallelize.
+
+= Classes of parallel algorithms
+- Embarrassingly parallel: tasks completely independent.
+- Parametric: exactly same problem but different parameter.
+- Data parallel: same operation but different data.
+- Task parallel: different task doing at the same time.
+    - Common for cloud computing, AKA micro-services.
+- Loosely synchronous: some subset of threads have to synchronize.
+- Synchronous: all threads have to synchronize.
+
+== Image processing
+- We only consider geometric transformations, and only those where each pixels can be calculated
+  independently of all other pixels.
+- Shifting: add a vector
+- Scaling: multiply by a vector
+- Rotation
+- Cropping
+- Smoothing: each pixel is a function of a surrounding pixels.
+- We want to partition images but that means if the new pixel value depend on pixels outside the
+  partition, then we need to communication and hence communication overhead.
+
+=== Mandelbrot Set
+- $z_(k + 1) = z_k^2 + c$, until $k > 2$.
+- if $k$ never gets bigger than 2 then it's black.
+- We can't just partition the image because some pixel have a lot of iteration while some have
+  almost none, leading to a waste of cost.
+
+Dynamic Load Balancing
+- Threads finish one pixel and ask for another pixel.
+
+=== Monte Carlo Methods
+- Integrate a function by throwing dart into the general area and see how many points lie under the
+  function.
+
+#import "@preview/physica:0.8.1": *
+
+=== Jacobi Iteration
+- Solve system of linear equation. Particularity good with sparse matrices.
+- Can solve $pdv(f, x, 2) + pdv(f, y, 2) = 0$
+    - Discretize space $=>$ solve $=>$ linear equation
+
+Gauss-Seidel relaxation
+- Instead of strictly using the old value of the last iteration, just use the new value.
+- Tends to converge faster.
+
+
